@@ -31,7 +31,7 @@ export interface Batch {
 export interface GenerateResponse {
   batchId: string;
   jobIds: string[];
-  status: string;
+  status: JobStatus;
 }
 
 export interface StatusResponse {
