@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jobManager } from '@/lib/jobManager';
 import { getGeminiClient } from '@/lib/gemini';
 import { GenerateRequest, GenerateResponse } from '@/lib/types';
+import { startCleanupTask } from '@/lib/cleanup';
+
+// Start cleanup task once
+let cleanupStarted = false;
+if (!cleanupStarted) {
+  startCleanupTask();
+  cleanupStarted = true;
+}
 
 export async function POST(request: NextRequest) {
   try {
