@@ -12,17 +12,21 @@ interface ImageUploadProps {
 export default function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFile = (file: File) => {
+    // Clear any previous errors
+    setError(null);
+
     // Validate file type
     if (!file.type.match('image/(jpeg|jpg|png|webp)')) {
-      alert('Please upload a JPG, PNG, or WebP image');
+      setError('Please upload a JPG, PNG, or WebP image');
       return;
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('Image must be less than 10MB');
+      setError('Image must be less than 10MB');
       return;
     }
 
@@ -30,6 +34,9 @@ export default function ImageUpload({ value, onChange, disabled }: ImageUploadPr
     const reader = new FileReader();
     reader.onload = (e) => {
       onChange(e.target?.result as string);
+    };
+    reader.onerror = () => {
+      setError('Failed to read image file');
     };
     reader.readAsDataURL(file);
   };
@@ -65,6 +72,12 @@ export default function ImageUpload({ value, onChange, disabled }: ImageUploadPr
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Upload Image (Optional)
       </label>
+
+      {error && (
+        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="flex gap-4">
         {/* Upload Area */}

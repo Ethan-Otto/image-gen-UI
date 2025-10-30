@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { GenerationMode, StatusResponse } from '@/lib/types';
 import PromptInput from '@/components/PromptInput';
 import ImageUpload from '@/components/ImageUpload';
@@ -22,6 +22,19 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [jobs, setJobs] = useState<StatusResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [cancelRequested, setCancelRequested] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleCancel = () => {
+    setCancelRequested(true);
+    setIsGenerating(false);
+
+    // Abort any ongoing fetch requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
 
   const handleGenerate = async () => {
     if (prompt.length < 3) {
@@ -32,6 +45,7 @@ export default function Home() {
     setError(null);
     setIsGenerating(true);
     setJobs([]);
+    setCancelRequested(false);
 
     try {
       const response = await fetch('/api/generate', {
@@ -73,22 +87,58 @@ export default function Home() {
     const pollInterval = 2000; // 2 seconds
     let allComplete = false;
 
-    while (!allComplete) {
+    // Create AbortController for cleanup
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    while (!allComplete && !cancelRequested) {
       await new Promise(resolve => setTimeout(resolve, pollInterval));
 
-      const statusPromises = jobIds.map(jobId =>
-        fetch(`/api/status/${jobId}`).then(res => res.json())
-      );
+      // Check if cancelled during sleep
+      if (cancelRequested || signal.aborted) {
+        break;
+      }
 
-      const statuses: StatusResponse[] = await Promise.all(statusPromises);
-      setJobs(statuses);
+      try {
+        const statusPromises = jobIds.map(jobId =>
+          fetch(`/api/status/${jobId}`, { signal }).then(res => {
+            if (!res.ok) {
+              throw new Error(`Failed to fetch status for job ${jobId}`);
+            }
+            return res.json();
+          })
+        );
 
-      // Check if all jobs are done
-      allComplete = statuses.every(
-        job => job.status === 'complete' || job.status === 'error'
-      );
+        const statuses: StatusResponse[] = await Promise.all(statusPromises);
+        setJobs(statuses);
+
+        // Check if all jobs are done
+        allComplete = statuses.every(
+          job => job.status === 'complete' || job.status === 'error'
+        );
+      } catch (err) {
+        // Handle network errors during polling
+        if (err instanceof Error && err.name === 'AbortError') {
+          // Request was cancelled, exit gracefully
+          break;
+        }
+
+        // For other network errors, set error state but keep existing job data
+        setError(
+          err instanceof Error
+            ? `Polling error: ${err.message}`
+            : 'Network error during polling'
+        );
+        // Continue polling - transient network errors might resolve
+        continue;
+      }
     }
 
+    // Cleanup
+    if (cancelRequested) {
+      setCancelRequested(false);
+    }
+    abortControllerRef.current = null;
     setIsGenerating(false);
   };
 
@@ -150,6 +200,15 @@ export default function Home() {
           >
             {isGenerating ? 'Generating...' : 'Generate Images'}
           </button>
+
+          {isGenerating && (
+            <button
+              onClick={handleCancel}
+              className="w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Cancel
+            </button>
+          )}
         </div>
 
         {/* Results Section */}
