@@ -36,8 +36,8 @@ test.describe('Error Handling', () => {
     await page.getByPlaceholder('Enter your image prompt').fill('Test prompt');
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
-    // Wait for error state
-    await expect(page.getByText(/quota exceeded/i)).toBeVisible({ timeout: 10000 });
+    // Wait for error state (use .first() since multiple jobs may show same error)
+    await expect(page.getByText(/quota exceeded/i).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle mixed success and error results', async ({ page }) => {
@@ -54,7 +54,7 @@ test.describe('Error Handling', () => {
     await page.waitForTimeout(5000);
 
     // Check for completed images
-    const images = page.locator('img[alt="Generated image"]');
+    const images = page.locator('img[alt^="Generated "]');
     const imageCount = await images.count();
     expect(imageCount).toBeGreaterThan(0);
 
@@ -151,7 +151,7 @@ test.describe('Error Handling', () => {
 
     // Second attempt - should succeed
     await page.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
   });
@@ -217,8 +217,8 @@ test.describe('Error Handling', () => {
     await page.getByPlaceholder('Enter your image prompt').fill('Test prompt');
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
-    // Should show error
-    await expect(page.getByText(/error|failed/i)).toBeVisible({ timeout: 5000 });
+    // Should show error box (JSON parse error will be caught and displayed)
+    await expect(page.locator('.bg-red-50')).toBeVisible({ timeout: 5000 });
   });
 
   test('should handle timeout errors gracefully', async ({ page }) => {
@@ -231,8 +231,8 @@ test.describe('Error Handling', () => {
     await page.getByPlaceholder('Enter your image prompt').fill('Test prompt');
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
-    // Should show timeout error
-    await expect(page.getByText(/timeout/i)).toBeVisible({ timeout: 10000 });
+    // Should show timeout error (use .first() since multiple jobs may timeout)
+    await expect(page.getByText(/timeout/i).first()).toBeVisible({ timeout: 10000 });
 
     // Should still allow new generation
     await expect(page.getByRole('button', { name: 'Generate Images' })).toBeEnabled({
@@ -292,7 +292,7 @@ test.describe('Error Handling', () => {
     await expect(page.getByText(/first error/i)).not.toBeVisible({ timeout: 5000 });
 
     // Should show success
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
   });

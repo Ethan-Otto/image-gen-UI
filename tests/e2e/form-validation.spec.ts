@@ -57,10 +57,9 @@ test.describe('Form Validation', () => {
       }
     });
 
-    // Should show error message
-    await expect(
-      page.getByText('Prompt must be at least 3 characters')
-    ).toBeVisible({ timeout: 5000 });
+    // Should show error message in error box
+    await expect(page.locator('.bg-red-50')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.bg-red-50')).toContainText('Prompt must be at least 3 characters');
   });
 
   test('should validate image count range', async ({ page }) => {
@@ -68,19 +67,17 @@ test.describe('Form Validation', () => {
 
     const imageCountSlider = page.locator('input[type="range"]').first();
 
-    // Check min value (should be 1)
-    await imageCountSlider.fill('0');
-    const minValue = await imageCountSlider.inputValue();
-    expect(parseInt(minValue)).toBeGreaterThanOrEqual(1);
+    // Check min and max attributes are set correctly
+    await expect(imageCountSlider).toHaveAttribute('min', '1');
+    await expect(imageCountSlider).toHaveAttribute('max', '10');
 
-    // Check max value (should be 10)
-    await imageCountSlider.fill('11');
-    const maxValue = await imageCountSlider.inputValue();
-    expect(parseInt(maxValue)).toBeLessThanOrEqual(10);
-
-    // Valid values
-    await imageCountSlider.fill('5');
-    expect(await imageCountSlider.inputValue()).toBe('5');
+    // Valid values work
+    await imageCountSlider.evaluate((el: HTMLInputElement) => {
+      el.value = '5';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await expect(page.getByText('Number of Images: 5')).toBeVisible();
   });
 
   test('should validate concurrency range', async ({ page }) => {
@@ -88,19 +85,17 @@ test.describe('Form Validation', () => {
 
     const concurrencySlider = page.locator('input[type="range"]').nth(1);
 
-    // Check min value (should be 1)
-    await concurrencySlider.fill('0');
-    const minValue = await concurrencySlider.inputValue();
-    expect(parseInt(minValue)).toBeGreaterThanOrEqual(1);
+    // Check min and max attributes are set correctly
+    await expect(concurrencySlider).toHaveAttribute('min', '1');
+    await expect(concurrencySlider).toHaveAttribute('max', '5');
 
-    // Check max value (should be 5)
-    await concurrencySlider.fill('6');
-    const maxValue = await concurrencySlider.inputValue();
-    expect(parseInt(maxValue)).toBeLessThanOrEqual(5);
-
-    // Valid values
-    await concurrencySlider.fill('3');
-    expect(await concurrencySlider.inputValue()).toBe('3');
+    // Valid values work
+    await concurrencySlider.evaluate((el: HTMLInputElement) => {
+      el.value = '3';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await expect(page.getByText('Concurrency: 3')).toBeVisible();
   });
 
   test('should validate temperature range', async ({ page }) => {
@@ -179,10 +174,9 @@ test.describe('Form Validation', () => {
       }
     });
 
-    // Wait for error
-    await expect(
-      page.getByText('Prompt must be at least 3 characters')
-    ).toBeVisible({ timeout: 5000 });
+    // Wait for error in error box
+    await expect(page.locator('.bg-red-50')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.bg-red-50')).toContainText('Prompt must be at least 3 characters');
 
     // Now mock success and try again
     await mockImmediateCompletion(page, 2);

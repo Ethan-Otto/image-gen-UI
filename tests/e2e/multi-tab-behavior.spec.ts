@@ -59,10 +59,10 @@ test.describe('Multi-Tab Behavior', () => {
     });
 
     // Both should complete
-    await expect(page1.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page1.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
-    await expect(page2.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page2.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -84,23 +84,23 @@ test.describe('Multi-Tab Behavior', () => {
     // Generate in first tab
     await page1.getByPlaceholder('Enter your image prompt').fill('Tab 1 prompt');
     await page1.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page1.locator('img[alt="Generated image"]')).toHaveCount(3, {
+    await expect(page1.locator('img[alt^="Generated "]')).toHaveCount(3, {
       timeout: 10000,
     });
 
     // Second tab should not have results
-    const page2Images = await page2.locator('img[alt="Generated image"]').count();
+    const page2Images = await page2.locator('img[alt^="Generated "]').count();
     expect(page2Images).toBe(0);
 
     // Generate in second tab
     await page2.getByPlaceholder('Enter your image prompt').fill('Tab 2 prompt');
     await page2.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page2.locator('img[alt="Generated image"]')).toHaveCount(2, {
+    await expect(page2.locator('img[alt^="Generated "]')).toHaveCount(2, {
       timeout: 10000,
     });
 
     // First tab should still have 3 images
-    await expect(page1.locator('img[alt="Generated image"]')).toHaveCount(3);
+    await expect(page1.locator('img[alt^="Generated "]')).toHaveCount(3);
 
     await context.close();
   });
@@ -189,7 +189,7 @@ test.describe('Multi-Tab Behavior', () => {
     });
 
     // Second tab should still complete
-    await expect(page2.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page2.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -224,7 +224,7 @@ test.describe('Multi-Tab Behavior', () => {
     // Generate in second tab - should succeed
     await page2.getByPlaceholder('Enter your image prompt').fill('Tab 2');
     await page2.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page2.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page2.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -283,7 +283,7 @@ test.describe('Multi-Tab Behavior', () => {
     // Second tab should still work fine
     await page2.getByPlaceholder('Enter your image prompt').fill('Tab 2');
     await page2.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page2.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page2.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -350,14 +350,14 @@ test.describe('Multi-Tab Behavior', () => {
     // Generate in first tab
     await page1.getByPlaceholder('Enter your image prompt').fill('Tab 1');
     await page1.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page1.locator('img[alt="Generated image"]')).toHaveCount(3, {
+    await expect(page1.locator('img[alt^="Generated "]')).toHaveCount(3, {
       timeout: 10000,
     });
 
     // Generate in second tab
     await page2.getByPlaceholder('Enter your image prompt').fill('Tab 2');
     await page2.getByRole('button', { name: 'Generate Images' }).click();
-    await expect(page2.locator('img[alt="Generated image"]')).toHaveCount(2, {
+    await expect(page2.locator('img[alt^="Generated "]')).toHaveCount(2, {
       timeout: 10000,
     });
 
@@ -365,11 +365,11 @@ test.describe('Multi-Tab Behavior', () => {
     await page1.reload();
 
     // First tab should reset
-    const page1Images = await page1.locator('img[alt="Generated image"]').count();
+    const page1Images = await page1.locator('img[alt^="Generated "]').count();
     expect(page1Images).toBe(0);
 
     // Second tab should still have results
-    await expect(page2.locator('img[alt="Generated image"]')).toHaveCount(2);
+    await expect(page2.locator('img[alt^="Generated "]')).toHaveCount(2);
 
     await context.close();
   });

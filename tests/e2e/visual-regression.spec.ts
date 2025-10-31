@@ -83,7 +83,7 @@ test.describe('Visual Regression Tests', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for all images
-    await expect(page.locator('img[alt="Generated image"]')).toHaveCount(6, {
+    await expect(page.locator('img[alt^="Generated "]')).toHaveCount(6, {
       timeout: 10000,
     });
 
@@ -365,7 +365,7 @@ test.describe('Visual Regression Tests', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -373,7 +373,7 @@ test.describe('Visual Regression Tests', () => {
     await page.waitForTimeout(1000);
 
     // Take screenshot of the image card
-    const imageCard = page.locator('img[alt="Generated image"]').first().locator('..');
+    const imageCard = page.locator('img[alt^="Generated "]').first().locator('..');
     await expect(imageCard).toHaveScreenshot('single-image-card.png', {
       animations: 'disabled',
     });

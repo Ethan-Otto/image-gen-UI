@@ -7,9 +7,12 @@ test.describe('Image Upload Functionality', () => {
   test('should show image upload area', async ({ page }) => {
     await page.goto('/');
 
-    // Look for file input or upload area
+    // File input exists but is hidden (by design)
     const fileInput = page.locator('input[type="file"]');
-    await expect(fileInput).toBeVisible();
+    await expect(fileInput).toBeAttached();
+
+    // Upload area should be visible
+    await expect(page.getByText('Upload Image (Optional)')).toBeVisible();
   });
 
   test('should upload image and show preview', async ({ page }) => {
@@ -205,7 +208,7 @@ test.describe('Image Upload Functionality', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Should generate successfully
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
   });
@@ -256,8 +259,8 @@ test.describe('Image Upload Functionality', () => {
     await page.waitForTimeout(1000);
 
     // Should handle the upload (may show loading state)
-    // File input should still be present
-    await expect(page.locator('input[type="file"]')).toBeVisible();
+    // File input should still be attached (though hidden)
+    await expect(page.locator('input[type="file"]')).toBeAttached();
   });
 
   test('should disable image upload during generation', async ({ page }) => {

@@ -14,7 +14,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for images to complete
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -37,7 +37,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image to complete
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -68,7 +68,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for all images
-    await expect(page.locator('img[alt="Generated image"]')).toHaveCount(3, {
+    await expect(page.locator('img[alt^="Generated "]')).toHaveCount(3, {
       timeout: 10000,
     });
 
@@ -98,7 +98,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -243,12 +243,12 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
     // Check that the image source is a data URL
-    const imgSrc = await page.locator('img[alt="Generated image"]').first().getAttribute('src');
+    const imgSrc = await page.locator('img[alt^="Generated "]').first().getAttribute('src');
     expect(imgSrc).toBeTruthy();
 
     // Should be able to download
@@ -274,7 +274,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 
@@ -317,7 +317,7 @@ test.describe('Download Features', () => {
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
     // Wait for image
-    await expect(page.locator('img[alt="Generated image"]').first()).toBeVisible({
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
       timeout: 10000,
     });
 

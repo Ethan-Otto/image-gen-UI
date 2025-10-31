@@ -184,7 +184,7 @@ test.describe('Cancel Functionality', () => {
     await page.getByRole('button', { name: 'Cancel' }).click();
 
     // Check if completed images are still visible
-    const completedImages = page.locator('img[alt="Generated image"]');
+    const completedImages = page.locator('img[alt^="Generated "]');
     const count = await completedImages.count();
 
     // Should have at least the completed ones
@@ -206,7 +206,7 @@ test.describe('Cancel Functionality', () => {
       timeout: 5000,
     });
 
-    // Second generation - should complete normally
+    // Second generation - should complete normally (not be cancelled immediately)
     await page.getByPlaceholder('Enter your image prompt').fill('Second prompt');
     await page.getByRole('button', { name: 'Generate Images' }).click();
 
@@ -215,9 +215,10 @@ test.describe('Cancel Functionality', () => {
       timeout: 2000,
     });
 
-    // Should NOT immediately cancel
-    await page.waitForTimeout(2000);
-    await expect(page.getByRole('button', { name: 'Generating...' })).toBeVisible();
+    // Generation should complete successfully (not be cancelled)
+    await expect(page.locator('img[alt^="Generated "]').first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should handle cancel during API request', async ({ page }) => {
